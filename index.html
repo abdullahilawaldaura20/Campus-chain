@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CampusChain — Campus Marketplace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12203A;
+    --ink-soft:#4A5568;
+    --paper:#EDF1F5;
+    --paper-raised:#FFFFFF;
+    --gold:#C99A2E;
+    --gold-dark:#A87E1F;
+    --teal:#1F8A70;
+    --clay:#B54B3A;
+    --line:#D7DEE6;
+    --radius:10px;
+    --shadow:0 2px 10px rgba(18,32,58,0.06);
+  }
+  [data-theme="dark"]{
+    --ink:#EDF1F5;
+    --ink-soft:#AEB9C9;
+    --paper:#0E1626;
+    --paper-raised:#161F33;
+    --line:#26324A;
+    --shadow:0 2px 14px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    transition:background .2s ease, color .2s ease;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+
+  /* NAV */
+  nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 28px;background:var(--paper-raised);border-bottom:1px solid var(--line);
+    position:sticky;top:0;z-index:50;flex-wrap:wrap;gap:12px;
+  }
+  .logo{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:700;font-family:'Fraunces',serif;}
+  .logo .link-dot{width:9px;height:9px;border-radius:50%;background:var(--gold);display:inline-block;}
+  .nav-links{display:flex;gap:22px;font-size:14px;font-weight:500;color:var(--ink-soft);flex-wrap:wrap;}
+  .nav-links button{background:none;border:none;color:inherit;font-size:14px;font-weight:500;padding:4px 0;}
+  .nav-links button.active{color:var(--ink);border-bottom:2px solid var(--gold);}
+  .nav-right{display:flex;align-items:center;gap:10px;}
+  .icon-btn{background:none;border:1px solid var(--line);border-radius:8px;padding:7px 10px;color:var(--ink-soft);font-size:13px;}
+
+  /* BUTTONS */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;border-radius:8px;border:none;font-weight:600;font-size:14px;}
+  .btn-primary{background:var(--ink);color:var(--paper-raised);}
+  .btn-gold{background:var(--gold);color:#1A1200;}
+  .btn-outline{background:none;border:1px solid var(--line);color:var(--ink);}
+  .btn-sm{padding:7px 12px;font-size:13px;border-radius:6px;}
+  .btn-danger{background:var(--clay);color:#fff;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+
+  main{max-width:1120px;margin:0 auto;padding:36px 24px 80px;}
+  .page{display:none;}
+  .page.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  /* HOME */
+  .hero{padding:56px 0 40px;border-bottom:1px solid var(--line);margin-bottom:44px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-dark);margin-bottom:14px;display:block;}
+  .hero h1{font-size:44px;line-height:1.08;max-width:640px;}
+  .hero p{color:var(--ink-soft);font-size:16px;max-width:520px;margin:18px 0 26px;line-height:1.6;}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap;}
+
+  .chain-steps{display:flex;gap:0;margin:56px 0;position:relative;flex-wrap:wrap;}
+  .chain-step{flex:1;min-width:200px;position:relative;padding:0 18px 0 0;}
+  .chain-step .num{
+    font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--gold-dark);
+    display:flex;align-items:center;gap:8px;margin-bottom:10px;
+  }
+  .chain-step .num::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block;}
+  .chain-step h3{font-size:16px;margin-bottom:6px;}
+  .chain-step p{font-size:13.5px;color:var(--ink-soft);line-height:1.5;margin:0;}
+  .chain-step:not(:last-child)::after{
+    content:"";position:absolute;top:6px;right:0;width:calc(100% - 200px);height:1px;background:var(--line);
+    display:none;
+  }
+  @media(min-width:760px){
+    .chain-step:not(:last-child)::after{display:block;}
+  }
+
+  section.block-label{font-family:'IBM Plex Mono',monospace;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);margin-bottom:16px;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;}
+
+  /* LEDGER STUB CARD — signature element */
+  .stub{
+    background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .15s ease;
+  }
+  .stub:hover{transform:translateY(-2px);}
+  .stub-img{height:130px;background:linear-gradient(135deg, var(--line), var(--paper));display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--ink-soft);}
+  .stub-body{padding:14px 16px 12px;}
+  .stub-body h3{font-size:15px;margin-bottom:4px;}
+  .stub-price{color:var(--gold-dark);font-weight:700;font-size:15px;}
+  .stub-cat{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .stub-perf{border-top:1px dashed var(--line);margin-top:12px;padding-top:8px;display:flex;justify-content:space-between;align-items:center;}
+  .stub-hash{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-soft);}
+  .status-pill{font-size:10.5px;padding:3px 8px;border-radius:20px;font-weight:600;}
+  .status-available{background:rgba(31,138,112,.14);color:var(--teal);}
+  .status-pending{background:rgba(201,154,46,.16);color:var(--gold-dark);}
+  .status-sold{background:rgba(181,75,58,.14);color:var(--clay);}
+
+  /* FORMS */
+  .card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px;}
+  .form-narrow{max-width:420px;margin:0 auto;}
+  label{display:block;font-size:13px;font-weight:600;margin:16px 0 6px;}
+  label:first-of-type{margin-top:0;}
+  input,select,textarea{
+    width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--line);
+    background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;font-size:14px;
+  }
+  textarea{resize:vertical;min-height:90px;}
+  .form-foot{margin-top:22px;display:flex;flex-direction:column;gap:10px;}
+  .form-alt{font-size:13px;color:var(--ink-soft);text-align:center;}
+  .form-alt button{background:none;border:none;color:var(--gold-dark);font-weight:600;font-size:13px;}
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:8px;
+    font-size:13.5px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:100;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
+
+  /* MARKETPLACE */
+  .toolbar{display:flex;gap:12px;margin-bottom:22px;flex-wrap:wrap;}
+  .toolbar input[type=text]{flex:1;min-width:180px;}
+  .chips{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
+  .chip{padding:6px 14px;border-radius:20px;border:1px solid var(--line);font-size:13px;background:var(--paper-raised);color:var(--ink-soft);}
+  .chip.active{background:var(--ink);color:var(--paper-raised);border-color:var(--ink);}
+
+  /* PRODUCT DETAIL */
+  .pd-layout{display:grid;grid-template-columns:1fr 1fr;gap:36px;}
+  @media(max-width:760px){.pd-layout{grid-template-columns:1fr;}}
+  .pd-image{height:320px;border-radius:var(--radius);background:linear-gradient(135deg,var(--line),var(--paper));display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--ink-soft);}
+  .pd-price{font-size:28px;font-weight:700;color:var(--gold-dark);margin:10px 0 18px;}
+  .seller-row{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:8px;margin:18px 0;background:var(--paper-raised);}
+  .avatar{width:38px;height:38px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;font-family:'Fraunces',serif;}
+  .stars{color:var(--gold);font-size:13px;}
+  .pd-actions{display:flex;gap:10px;margin-top:20px;}
+
+  /* PROFILE */
+  .profile-head{display:flex;gap:20px;align-items:center;margin-bottom:28px;flex-wrap:wrap;}
+  .avatar-lg{width:72px;height:72px;border-radius:50%;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;font-family:'Fraunces',serif;}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:22px;}
+  .tab{padding:10px 16px;font-size:14px;font-weight:600;color:var(--ink-soft);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;}
+  .tab.active{color:var(--ink);border-bottom-color:var(--gold);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .list-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .list-row:last-child{border-bottom:none;}
+
+  /* ADMIN */
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:32px;}
+  .stat-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);}
+  .stat-card .n{font-family:'Fraunces',serif;font-size:30px;font-weight:600;}
+  .stat-card .l{font-size:12.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin-top:4px;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;padding:10px 12px;color:var(--ink-soft);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--line);}
+  td{padding:12px;border-bottom:1px solid var(--line);}
+  .admin-section{margin-bottom:36px;}
+  .admin-section h2{font-size:19px;margin-bottom:14px;}
+  .chain-status{display:flex;align-items:center;gap:10px;}
+  .dot-ok{width:10px;height:10px;border-radius:50%;background:var(--teal);}
+
+  footer{text-align:center;padding:28px;color:var(--ink-soft);font-size:12.5px;border-top:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo"><span class="link-dot"></span>CampusChain</div>
+  <div class="nav-links">
+    <button data-page="home" class="active">Home</button>
+    <button data-page="marketplace">Marketplace</button>
+    <button data-page="sell">Buy / Sell</button>
+    <button data-page="profile">Profile</button>
+    <button data-page="admin">Admin</button>
+  </div>
+  <div class="nav-right">
+    <button class="icon-btn" id="themeToggle">🌙 Dark mode</button>
+    <button class="btn btn-outline btn-sm" data-page="login">Log in</button>
+    <button class="btn btn-primary btn-sm" data-page="register">Sign up</button>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HOME -->
+  <section class="page active" id="page-home">
+    <div class="hero">
+      <span class="eyebrow">Student-to-student · ledger-verified</span>
+      <h1>Trade on campus.<br>Verified on the ledger.</h1>
+      <p>Buy and sell with people you actually go to school with. Every completed trade is sealed into an append-only chain, so no one can quietly rewrite what happened.</p>
+      <div class="hero-actions">
+        <button class="btn btn-gold" data-page="marketplace">Browse marketplace</button>
+        <button class="btn btn-outline" data-page="register">Create account</button>
+      </div>
+    </div>
+
+    <div class="chain-steps">
+      <div class="chain-step">
+        <div class="num">block 01</div>
+        <h3>Register</h3>
+        <p>Sign up with your school email — one verified account per student.</p>
+      </div>
+      <div class="chain-step">
+        <div class="num">block 02</div>
+        <h3>List or browse</h3>
+        <p>Post what you're selling, or search what's already on the marketplace.</p>
+      </div>
+      <div class="chain-step">
+        <div class="num">block 03</div>
+        <h3>Meet & confirm</h3>
+        <p>Arrange the handoff and confirm it — scan a QR code if you're meeting in person.</p>
+      </div>
+      <div class="chain-step">
+        <div class="num">block 04</div>
+        <h3>Sealed on-chain</h3>
+        <p>The trade is hashed and appended to the ledger — permanent, tamper-evident proof.</p>
+      </div>
+    </div>
+
+    <div class="block-label">Featured listings</div>
+    <div class="grid" id="homeListings"></div>
+  </section>
+
+  <!-- REGISTER -->
+  <section class="page" id="page-register">
+    <div class="card form-narrow">
+      <h2 style="font-size:22px;margin-bottom:6px;">Create your account</h2>
+      <p style="color:var(--ink-soft);font-size:13.5px;margin:0 0 6px;">Use your school email — it's how we verify you're a student.</p>
+      <form id="registerForm">
+        <label>Full name</label>
+        <input type="text" placeholder="Amina Yusuf" required>
+        <label>School email</label>
+        <input type="email" placeholder="you@school.edu.ng" required>
+        <label>Student ID</label>
+        <input type="text" placeholder="e.g. CS/21/1043" required>
+        <label>Password</label>
+        <input type="password" placeholder="At least 8 characters" required>
+        <label>Confirm password</label>
+        <input type="password" required>
+        <div class="form-foot">
+          <button class="btn btn-primary" type="submit">Create account</button>
+          <div class="form-alt">Already have an account? <button type="button" data-page="login">Log in</button></div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- LOGIN -->
+  <section class="page" id="page-login">
+    <div class="card form-narrow">
+      <h2 style="font-size:22px;margin-bottom:6px;">Welcome back</h2>
+      <p style="color:var(--ink-soft);font-size:13.5px;margin:0 0 6px;">Log in with your school email.</p>
+      <form id="loginForm">
+        <label>School email</label>
+        <input type="email" placeholder="you@school.edu.ng" required>
+        <label>Password</label>
+        <input type="password" required>
+        <div class="form-foot">
+          <button class="btn btn-primary" type="submit">Log in</button>
+          <div class="form-alt"><button type="button">Forgot password?</button></div>
+          <div class="form-alt">New here? <button type="button" data-page="register">Create an account</button></div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- MARKETPLACE -->
+  <section class="page" id="page-marketplace">
+    <h2 style="font-size:24px;margin-bottom:18px;">Marketplace</h2>
+    <div class="toolbar">
+      <input type="text" id="searchInput" placeholder="Search for textbooks, electronics, furniture…">
+      <select id="sortSelect">
+        <option>Newest first</option>
+        <option>Price: low to high</option>
+        <option>Price: high to low</option>
+      </select>
+    </div>
+    <div class="chips" id="categoryChips">
+      <button class="chip active" data-cat="all">All</button>
+      <button class="chip" data-cat="Books">Books</button>
+      <button class="chip" data-cat="Electronics">Electronics</button>
+      <button class="chip" data-cat="Furniture">Furniture</button>
+      <button class="chip" data-cat="Fashion">Fashion</button>
+    </div>
+    <div class="grid" id="marketGrid"></div>
+  </section>
+
+  <!-- PRODUCT DETAIL -->
+  <section class="page" id="page-product">
+    <div class="pd-layout">
+      <div class="pd-image" id="pdImage">📘</div>
+      <div>
+        <span class="eyebrow" id="pdCat">Books</span>
+        <h2 style="font-size:26px;" id="pdTitle">Digital Electronics Textbook (4th Ed.)</h2>
+        <div class="pd-price" id="pdPrice">₦4,500</div>
+        <p style="color:var(--ink-soft);line-height:1.6;font-size:14.5px;" id="pdDesc">
+          Barely used, no highlights or torn pages. Covers everything in the 200-level syllabus. Selling because I've graduated out of the course.
+        </p>
+        <div class="seller-row">
+          <div class="avatar" id="pdAvatar">TB</div>
+          <div>
+            <div style="font-weight:600;font-size:14px;" id="pdSeller">Tunde B.</div>
+            <div class="stars" id="pdStars">★★★★★ <span class="mono" style="color:var(--ink-soft);">4.8 (32)</span></div>
+          </div>
+        </div>
+        <div class="pd-actions">
+          <button class="btn btn-gold" id="buyNowBtn">Buy now</button>
+          <button class="btn btn-outline">Message seller</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SELL / BUY -->
+  <section class="page" id="page-sell">
+    <h2 style="font-size:24px;margin-bottom:18px;">Buy &amp; Sell</h2>
+    <div class="pd-layout" style="grid-template-columns:1.2fr .8fr;">
+      <div class="card">
+        <h3 style="font-size:17px;margin-bottom:14px;">List a new item</h3>
+        <form id="sellForm">
+          <label>Title</label>
+          <input type="text" placeholder="e.g. Scientific Calculator FX-991" required>
+          <label>Category</label>
+          <select required>
+            <option value="">Select category</option>
+            <option>Books</option><option>Electronics</option><option>Furniture</option><option>Fashion</option>
+          </select>
+          <label>Price (₦)</label>
+          <input type="number" placeholder="0.00" required>
+          <label>Condition</label>
+          <select><option>New</option><option>Like new</option><option>Used — good</option><option>Used — fair</option></select>
+          <label>Description</label>
+          <textarea placeholder="What are you selling? Any wear, why you're selling it, pickup location…"></textarea>
+          <div class="form-foot"><button class="btn btn-primary" type="submit">List item</button></div>
+        </form>
+      </div>
+      <div class="card">
+        <h3 style="font-size:17px;margin-bottom:14px;">Incoming requests</h3>
+        <div class="list-row"><div><strong>Chidi O.</strong><br><span class="mono" style="font-size:12px;color:var(--ink-soft);">wants: HP Laptop Charger</span></div><button class="btn btn-sm btn-gold">Accept</button></div>
+        <div class="list-row"><div><strong>Fatima A.</strong><br><span class="mono" style="font-size:12px;color:var(--ink-soft);">wants: Reading Lamp</span></div><button class="btn btn-sm btn-gold">Accept</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section class="page" id="page-profile">
+    <div class="profile-head">
+      <div class="avatar-lg">AY</div>
+      <div>
+        <h2 style="font-size:22px;">Amina Yusuf</h2>
+        <div style="color:var(--ink-soft);font-size:13.5px;">CS/21/1043 · <span class="stars">★★★★☆ 4.6</span></div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-left:auto;">Edit profile</button>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-tab="listings">My listings</button>
+      <button class="tab" data-tab="history">Purchase history</button>
+      <button class="tab" data-tab="reviews">Reviews received</button>
+    </div>
+    <div class="tab-panel active" id="tab-listings">
+      <div class="list-row">Digital Electronics Textbook <span class="status-pill status-available">Available</span></div>
+      <div class="list-row">Reading Lamp <span class="status-pill status-pending">Pending</span></div>
+      <div class="list-row">Old Room Fan <span class="status-pill status-sold">Sold</span></div>
+    </div>
+    <div class="tab-panel" id="tab-history">
+      <div class="list-row">Bought: Bluetooth Speaker — ₦6,000 <span class="mono" style="font-size:11.5px;color:var(--ink-soft);">tx_8f21c…</span></div>
+      <div class="list-row">Bought: Study Desk — ₦12,000 <span class="mono" style="font-size:11.5px;color:var(--ink-soft);">tx_2a90e…</span></div>
+    </div>
+    <div class="tab-panel" id="tab-reviews">
+      <div class="list-row">"Fast handoff, item exactly as described." — Chidi O. <span class="stars">★★★★★</span></div>
+      <div class="list-row">"Good communication." — Fatima A. <span class="stars">★★★★☆</span></div>
+    </div>
+  </section>
+
+  <!-- ADMIN -->
+  <section class="page" id="page-admin">
+    <h2 style="font-size:24px;margin-bottom:20px;">Admin dashboard</h2>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="n">1,204</div><div class="l">Total students</div></div>
+      <div class="stat-card"><div class="n">387</div><div class="l">Active listings</div></div>
+      <div class="stat-card"><div class="n">2,915</div><div class="l">Completed transactions</div></div>
+      <div class="stat-card">
+        <div class="chain-status"><span class="dot-ok"></span><div class="n" style="font-size:18px;">Chain valid</div></div>
+        <div class="l">Last checked just now</div>
+      </div>
+    </div>
+
+    <div class="admin-section">
+      <h2>Recent transactions</h2>
+      <table>
+        <thead><tr><th>Tx ID</th><th>Product</th><th>Buyer</th><th>Seller</th><th>Block</th><th>Status</th></tr></thead>
+        <tbody id="adminTxTable"></tbody>
+      </table>
+    </div>
+
+    <div class="admin-section">
+      <h2>Users</h2>
+      <table>
+        <thead><tr><th>Name</th><th>Student ID</th><th>Rating</th><th>Status</th><th></th></tr></thead>
+        <tbody id="adminUsersTable"></tbody>
+      </table>
+    </div>
+
+    <div class="admin-section">
+      <button class="btn btn-primary" id="validateChainBtn">Validate chain integrity</button>
+    </div>
+  </section>
+
+</main>
+
+<footer>CampusChain · Built with Flask + MySQL + a custom hash-chain blockchain</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = "/api";
+  let currentUser = null;      // filled in by refreshSession()
+  let currentProductId = null; // tracked so buyNowBtn knows what to buy
+
+  // ---------- Fetch helper ----------
+  async function api(path, options = {}) {
+    const res = await fetch(API + path, {
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+    let data = null;
+    try { data = await res.json(); } catch (e) { /* no body */ }
+    if (!res.ok) {
+      throw new Error((data && data.error) || `Request failed (${res.status})`);
+    }
+    return data;
+  }
+
+  const CATEGORY_EMOJI = { Books: "📘", Electronics: "🔌", Furniture: "🪑", Fashion: "🧥" };
+
+  function stubCard(p){
+    const pill = p.status==="available" ? "status-available" : p.status==="pending" ? "status-pending" : "status-sold";
+    const label = p.status.charAt(0).toUpperCase()+p.status.slice(1);
+    const emoji = CATEGORY_EMOJI[p.category] || "📦";
+    return `<div class="stub" onclick="openProduct(${p.id})">
+      <div class="stub-img">${emoji}</div>
+      <div class="stub-body">
+        <h3>${p.title}</h3>
+        <div class="stub-price">₦${Number(p.price).toLocaleString()}</div>
+        <div class="stub-cat">${p.category}</div>
+        <div class="stub-perf">
+          <span class="status-pill ${pill}">${label}</span>
+          <span class="stub-hash">#${p.id.toString(16).padStart(4,'0')}</span>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  async function renderHome(){
+    try {
+      const products = await api("/products?sort=newest");
+      document.getElementById('homeListings').innerHTML = products.slice(0,3).map(stubCard).join('') || `<p style="color:var(--ink-soft);">No listings yet.</p>`;
+    } catch (e) { showToast(e.message); }
+  }
+
+  async function renderMarket(){
+    const q = document.getElementById('searchInput').value;
+    const cat = document.querySelector('#categoryChips .chip.active').dataset.cat;
+    const sortLabel = document.getElementById('sortSelect').value;
+    const sortMap = { "Newest first":"newest", "Price: low to high":"price_asc", "Price: high to low":"price_desc" };
+    const params = new URLSearchParams({ q, category: cat, sort: sortMap[sortLabel] || "newest" });
+    try {
+      const products = await api(`/products?${params.toString()}`);
+      document.getElementById('marketGrid').innerHTML = products.map(stubCard).join('') || `<p style="color:var(--ink-soft);">No items match your search.</p>`;
+    } catch (e) { showToast(e.message); }
+  }
+
+  async function openProduct(id){
+    try {
+      const p = await api(`/products/${id}`);
+      currentProductId = p.id;
+      document.getElementById('pdImage').textContent = CATEGORY_EMOJI[p.category] || "📦";
+      document.getElementById('pdCat').textContent = p.category;
+      document.getElementById('pdTitle').textContent = p.title;
+      document.getElementById('pdPrice').textContent = "₦"+Number(p.price).toLocaleString();
+      document.getElementById('pdDesc').textContent = p.description || "";
+      document.getElementById('pdSeller').textContent = p.seller_name || "Unknown seller";
+      document.getElementById('pdAvatar').textContent = (p.seller_name || "??").split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+      document.getElementById('pdStars').innerHTML = `<span class="mono" style="color:var(--ink-soft);">Seller rating loads with reviews on the profile page</span>`;
+      const buyBtn = document.getElementById('buyNowBtn');
+      buyBtn.disabled = p.status !== "available";
+      buyBtn.textContent = p.status==="available" ? "Buy now" : (p.status==="sold" ? "Sold" : "Pending");
+      showPage('product');
+    } catch (e) { showToast(e.message); }
+  }
+
+  // ---------- Navigation ----------
+  function showPage(name){
+    document.querySelectorAll('.page').forEach(s=>s.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    document.querySelectorAll('.nav-links button').forEach(b=>b.classList.toggle('active', b.dataset.page===name));
+    window.scrollTo({top:0,behavior:'smooth'});
+    if (name === "profile") loadProfile();
+    if (name === "admin") loadAdmin();
+  }
+  document.querySelectorAll('[data-page]').forEach(el=>{
+    el.addEventListener('click', ()=> showPage(el.dataset.page));
+  });
+
+  // ---------- Toast ----------
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2600);
+  }
+
+  // ---------- Session ----------
+  async function refreshSession(){
+    try {
+      currentUser = await api("/me");
+    } catch (e) {
+      currentUser = null;
+    }
+  }
+
+  // ---------- Auth forms ----------
+  document.getElementById('registerForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const f = e.target;
+    const body = {
+      name: f[0].value, school_email: f[1].value,
+      student_id: f[2].value, password: f[3].value,
+    };
+    if (f[3].value !== f[4].value) { showToast("Passwords don't match"); return; }
+    try {
+      currentUser = await api("/register", { method: "POST", body: JSON.stringify(body) });
+      showToast('Account created — welcome to CampusChain!');
+      showPage('marketplace');
+    } catch (err) { showToast(err.message); }
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const f = e.target;
+    try {
+      currentUser = await api("/login", { method: "POST", body: JSON.stringify({ school_email: f[0].value, password: f[1].value }) });
+      showToast('Logged in.');
+      showPage('marketplace');
+    } catch (err) { showToast(err.message); }
+  });
+
+  // ---------- Sell form ----------
+  document.getElementById('sellForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const f = e.target;
+    const body = {
+      title: f[0].value, category: f[1].value, price: parseFloat(f[2].value),
+      condition: f[3].value, description: f[4].value,
+    };
+    try {
+      await api("/products", { method: "POST", body: JSON.stringify(body) });
+      showToast('Listing published.');
+      f.reset();
+      renderMarket();
+    } catch (err) { showToast(err.message); }
+  });
+
+  // ---------- Buy flow ----------
+  document.getElementById('buyNowBtn').addEventListener('click', async ()=>{
+    if (!currentProductId) return;
+    try {
+      await api(`/products/${currentProductId}/buy-request`, { method: "POST" });
+      showToast('Purchase request sent to seller.');
+    } catch (err) { showToast(err.message); }
+  });
+
+  // ---------- Admin ----------
+  document.getElementById('validateChainBtn').addEventListener('click', async ()=>{
+    try {
+      const result = await api("/admin/chain/validate");
+      showToast(result.valid
+        ? `Chain valid — ${result.blocks_checked} blocks intact.`
+        : `Chain BROKEN at block #${result.broken_at_block_id}!`);
+    } catch (err) { showToast(err.message); }
+  });
+
+  async function loadAdmin(){
+    try {
+      const stats = await api("/admin/stats");
+      document.querySelectorAll("#page-admin .stat-card .n")[0].textContent = stats.total_users;
+      document.querySelectorAll("#page-admin .stat-card .n")[1].textContent = stats.active_listings;
+      document.querySelectorAll("#page-admin .stat-card .n")[2].textContent = stats.completed_transactions;
+
+      const users = await api("/admin/users");
+      const nameOf = id => (users.find(u => u.id === id) || {}).name || `#${id}`;
+
+      const txs = await api("/admin/transactions");
+      document.getElementById('adminTxTable').innerHTML = txs.map(t => `
+        <tr><td class="mono">tx_${t.id}</td><td>${t.product_title||''}</td><td>${nameOf(t.buyer_id)}</td><td>${nameOf(t.seller_id)}</td>
+        <td class="mono">${t.block_id ?? '—'}</td><td>${t.status}</td></tr>
+      `).join('') || `<tr><td colspan="6" style="color:var(--ink-soft);">No transactions yet.</td></tr>`;
+
+      document.getElementById('adminUsersTable').innerHTML = users.map(u => `
+        <tr><td>${u.name}</td><td>${u.student_id}</td><td>${u.rating_avg ?? '—'}</td><td>${u.status}</td>
+        <td>${u.status === 'active'
+          ? `<button class="btn btn-sm btn-outline" onclick="suspendUser(${u.id})">Suspend</button>`
+          : `<button class="btn btn-sm btn-outline" onclick="reinstateUser(${u.id})">Reinstate</button>`}</td></tr>
+      `).join('');
+    } catch (e) { showToast(e.message); }
+  }
+
+  async function suspendUser(id){
+    try { await api(`/admin/users/${id}/suspend`, { method: "POST" }); showToast('User suspended.'); loadAdmin(); }
+    catch (e) { showToast(e.message); }
+  }
+  async function reinstateUser(id){
+    try { await api(`/admin/users/${id}/reinstate`, { method: "POST" }); showToast('User reinstated.'); loadAdmin(); }
+    catch (e) { showToast(e.message); }
+  }
+
+  // ---------- Profile ----------
+  async function loadProfile(){
+    if (!currentUser) { showToast('Log in to view your profile.'); showPage('login'); return; }
+
+    document.querySelector('.profile-head h2').textContent = currentUser.name;
+    document.querySelector('.profile-head .avatar-lg').textContent =
+      currentUser.name.split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+    document.querySelector('.profile-head div[style]').innerHTML =
+      `${currentUser.student_id} · <span class="stars">★ ${currentUser.rating_avg ?? 'No ratings yet'}</span>`;
+
+    try {
+      const listings = await api(`/products?seller_id=${currentUser.id}`);
+      document.getElementById('tab-listings').innerHTML = listings.map(p => {
+        const pill = p.status==="available" ? "status-available" : p.status==="pending" ? "status-pending" : "status-sold";
+        return `<div class="list-row">${p.title} <span class="status-pill ${pill}">${p.status}</span></div>`;
+      }).join('') || `<p style="color:var(--ink-soft);">No listings yet.</p>`;
+
+      const history = await api(`/me/transactions`);
+      document.getElementById('tab-history').innerHTML = history.map(t => {
+        const role = t.buyer_id === currentUser.id ? "Bought" : "Sold";
+        return `<div class="list-row">${role}: ${t.product_title || ''} — ₦${Number(t.amount).toLocaleString()}
+          <span class="mono" style="font-size:11.5px;color:var(--ink-soft);">${t.status}${t.block_id ? ' · block #'+t.block_id : ''}</span></div>`;
+      }).join('') || `<p style="color:var(--ink-soft);">No transactions yet.</p>`;
+
+      const reviews = await api(`/users/${currentUser.id}/reviews`);
+      document.getElementById('tab-reviews').innerHTML = reviews.map(r =>
+        `<div class="list-row">"${r.comment || ''}" <span class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span></div>`
+      ).join('') || `<p style="color:var(--ink-soft);">No reviews yet.</p>`;
+    } catch (e) { showToast(e.message); }
+  }
+
+  // ---------- Marketplace filters ----------
+  document.getElementById('searchInput').addEventListener('input', () => renderMarket());
+  document.getElementById('sortSelect').addEventListener('change', () => renderMarket());
+  document.querySelectorAll('#categoryChips .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('#categoryChips .chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      renderMarket();
+    });
+  });
+
+  // ---------- Profile tabs ----------
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-'+tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ---------- Theme toggle ----------
+  let dark = false;
+  document.getElementById('themeToggle').addEventListener('click', ()=>{
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('themeToggle').textContent = dark ? '☀️ Light mode' : '🌙 Dark mode';
+  });
+
+  // ---------- Init ----------
+  refreshSession().then(()=>{
+    renderHome();
+    renderMarket();
+  });
+</script>
+</body>
+</html>
