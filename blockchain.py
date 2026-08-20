@@ -43,13 +43,13 @@ def init_genesis_block_if_needed():
     genesis_hash = _compute_hash(0, "genesis", 0, 0, 0, timestamp, GENESIS_PREVIOUS_HASH)
 
     genesis = BlockchainBlock(
-        transaction_id=0,
-        seller_id=0,
-        buyer_id=0,
-        product_id=0,
+        transaction_id=None,
+        seller_id=None,
+        buyer_id=None,
+        product_id=None,
         timestamp=datetime.now(timezone.utc),
-        previous_hash=GENESIS_PREVIOUS_HASH,
-        current_hash=genesis_hash,
+        previous_hash="0" * 64
+        current_hash=calculate_genesis_hash(),
     )
     db.session.add(genesis)
     db.session.commit()
